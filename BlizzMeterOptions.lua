@@ -87,6 +87,10 @@ local OptionInfo = {
 		default = true,
 		apply = ApplyRefreshEntries,
 	},
+	smoothBars = {
+		default = true,
+		apply = ApplyRefreshEntries,
+	},
 	textColor = {
 		default = "ffffffff",
 		apply = ApplyRefreshEntries,
@@ -272,9 +276,9 @@ end
 -- Ranges and choices match the Damage Meter's entries in Blizzard_EditMode's EditModeSettingDisplayInfo.
 local function RegisterOptionsPanel()
 	local layout;
-	category, layout = Settings.RegisterVerticalLayoutCategory(addonName);
-
-	layout:AddInitializer(CreateSettingsListSectionHeaderInitializer("Appearance"));
+	local version = C_AddOns.GetAddOnMetadata(addonName, "Version");
+	local title = version and (addonName .. " v" .. version) or addonName;
+	category, layout = Settings.RegisterVerticalLayoutCategory(title);
 
 	AddDropdown("style", HUD_EDIT_MODE_SETTING_DAMAGE_METER_STYLE, {
 		{ value = Enum.DamageMeterStyle.Default, text = HUD_EDIT_MODE_SETTING_DAMAGE_METER_STYLE_DEFAULT },
@@ -318,6 +322,9 @@ local function RegisterOptionsPanel()
 	AddCheckbox("pinLocalPlayer", "Always Show Your Bar",
 		"When your bar is scrolled out of view, pin it to the top or bottom edge of the window.");
 
+	AddCheckbox("smoothBars", "Smooth Bar Animation",
+		"Ease the bars toward their new values instead of jumping on each update.");
+
 	AddCheckbox("showRealmNames", "Show Realm Names",
 		"Show players from other realms as \"Name-Realm\" instead of just \"Name\".");
 
@@ -325,8 +332,6 @@ local function RegisterOptionsPanel()
 		"Draw the black outline and shadow around the names and numbers on the bars.");
 
 	AddColorSwatch("textColor", "Text Color", "Color of the names and numbers on the bars.");
-
-	layout:AddInitializer(CreateSettingsListSectionHeaderInitializer("Edit Mode"));
 
 	local copyFromEditModeTooltip = "Replace the options that Edit Mode also has with the Damage Meter's settings from your current Edit Mode layout. Position and size always come from Edit Mode.";
 	layout:AddInitializer(CreateSettingsButtonInitializer("Copy Edit Mode Settings", "Copy", Options.CopyFromEditMode, copyFromEditModeTooltip, true));

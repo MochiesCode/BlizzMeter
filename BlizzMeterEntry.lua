@@ -1,5 +1,6 @@
 local _, BlizzMeterPrivate = ...;
 local IsSecret = BlizzMeterPrivate.IsSecret;
+local StatusBarInterpolation = Enum.StatusBarInterpolation and Enum.StatusBarInterpolation.ExponentialEaseOut;
 
 BlizzMeterEntryMixin = {};
 
@@ -237,7 +238,13 @@ end
 
 function BlizzMeterEntryMixin:UpdateStatusBar()
 	self:GetStatusBar():SetMinMaxValues(0, self:GetMaxStatusValue());
-	self:GetStatusBar():SetValue(self:GetStatusValue());
+	-- BlizzMeter: optionally eases the fill toward the new value instead of snapping. The interpolation is done
+	-- by the widget itself, so it works on secret values where addon code couldn't animate them by hand.
+	if StatusBarInterpolation and BlizzMeterPrivate.Options.Get("smoothBars") then
+		self:GetStatusBar():SetValue(self:GetStatusValue(), StatusBarInterpolation);
+	else
+		self:GetStatusBar():SetValue(self:GetStatusValue());
+	end
 end
 
 function BlizzMeterEntryMixin:SetupSharedStyleAnchors()

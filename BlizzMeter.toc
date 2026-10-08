@@ -2,7 +2,7 @@
 ## Title: BlizzMeter
 ## Notes: A standalone copy of the Blizzard Damage Meter that follows the Blizzard meter's Edit Mode position and size, with its own style options.
 ## Author: MochiesCode
-## Version: 1.0.0
+## Version: 1.1
 ## OptionalDeps: Blizzard_DamageMeter
 ## SavedVariables: BlizzMeterSettings
 ## SavedVariablesPerCharacter: BlizzMeterPerCharacterSettings
