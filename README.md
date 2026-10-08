@@ -1,77 +1,51 @@
 # BlizzMeter
 
-A standalone copy of the Blizzard Damage Meter (`Blizzard_DamageMeter`, 12.1.0.69933), meant as a base for a custom meter.
+BlizzMeter is World of Warcraft's built-in damage meter with extra ways to customize how it looks. It works and feels just like the Blizzard meter: same windows, same menus, same data. It just gives you more control over its appearance.
 
-## How it maps to the Blizzard source
+## Getting started
 
-Each file is a port of the matching Blizzard file, with `DamageMeter` renamed to `BlizzMeter` in every global (mixins, templates, frames, constants, saved variables, menu tags):
+1. Put the `BlizzMeter` folder in `World of Warcraft/_retail_/Interface/AddOns`.
+2. Make sure the game's own damage meter is turned on in the game's options. The gear menu on the meter has a shortcut to that setting.
+3. Log in. BlizzMeter takes the place of the Blizzard meter automatically.
 
-| BlizzMeter | Blizzard_DamageMeter |
-| --- | --- |
-| `BlizzMeter.lua/.xml` | `DamageMeter.lua/.xml` |
-| `BlizzMeterSessionWindow.lua/.xml` | `DamageMeterSessionWindow.lua/.xml` |
-| `BlizzMeterSourceWindow.lua/.xml` | `DamageMeterSourceWindow.lua/.xml` |
-| `BlizzMeterEntry.lua/.xml` | `DamageMeterEntry.lua/.xml` |
-| `BlizzMeterSettingsDropdownButton.lua/.xml` | `DamageMeterSettingsDropdownButton.lua/.xml` |
-| `BlizzMeterConstants.lua` | `DamageMeterConstants.lua` |
-| `BlizzMeterEditMode.lua/.xml` | `EditModeDamageMeterSystemMixin` / template in `Blizzard_EditMode` |
-| `BlizzMeterOptions.lua` | (new) the options panel |
-| `BlizzMeterSecrets.lua` | (new) helpers for secret values |
+To go back to the Blizzard meter, just disable BlizzMeter in the AddOns list.
 
-Every place where the code differs from Blizzard's is marked with a `BlizzMeter:` comment.
+## Moving and resizing
 
-## Edit Mode
-
-Addons can't register their own Edit Mode systems, so BlizzMeter follows the Blizzard Damage Meter's (`BlizzMeterEditMode.lua`):
-
-- The meter is anchored to the Blizzard meter's Edit Mode frame, so it takes that frame's position and size, live while it's dragged or resized, and copies its scale.
-- The Damage Meter's other Edit Mode settings (style, numbers, bar height, padding, opacity, background, text size, visibility, spec icons, class colors) only give BlizzMeter's options their starting values. After that, change them in BlizzMeter's options; changing them in Edit Mode has no effect on BlizzMeter.
-- Turning on the Damage Meter in Edit Mode shows BlizzMeter's preview, the same as Blizzard's.
-
-The Blizzard meter keeps running underneath so it can still be moved and resized in Edit Mode, but its windows are moved into a hidden frame so only BlizzMeter shows. Disabling BlizzMeter brings the Blizzard meter back unchanged.
+Move and resize the main window in **Edit Mode**, the same way you would the Blizzard meter. Extra windows you open from the gear menu can be dragged and resized anywhere.
 
 ## Options
 
-Open them from Options > AddOns > BlizzMeter, with `/bm`, or from "BlizzMeter Options" in a meter window's settings menu.
+Open the options in any of these ways:
 
-**Appearance** has every Damage Meter style setting from Edit Mode, with the same ranges and choices, plus:
+- Type `/bm` in chat.
+- Go to **Options > AddOns > BlizzMeter**.
+- Click the gear on a meter window and choose **BlizzMeter Options**.
 
-- **Spec Icon Shape:** Square (Blizzard's), Circle, or Circle with Ring (masked inside the `services-cover-ring` atlas). Applies to class and spec icons; spell icons stay square.
-- **Bar Color:** shown while Show Class Color is off. Every bar uses this color instead of Blizzard's default, ally and enemy colors.
-- **Always Show Your Bar:** when your bar is scrolled out of view, it's pinned to the top or bottom edge of the window (Blizzard's behavior). Turn off to let it scroll away like the others.
-- **Show Realm Names:** shows players from other realms as "Name-Realm" instead of "Name".
-- **Text Outline:** turn off to remove the black outline and shadow from the names and numbers on the bars.
-- **Text Color:** color of the names and numbers on the bars. Class-colored names in the spell breakdown keep their class color.
+You'll find all of the meter's usual look settings (style, numbers, bar height, spacing, opacity, background, text size, when to show it, spec icons and class colors), plus:
 
-**Copy Edit Mode Settings** replaces the options that Edit Mode also has with the values from your current Edit Mode layout.
+- **Spec Icon Shape:** show class and spec icons as squares, circles, or circles with a gold ring. Spell icons always stay square.
+- **Bar Color:** when Show Class Color is off, pick the color for every bar.
+- **Always Show Your Bar:** keeps your own bar visible at the top or bottom of the window, even when you're ranked too low to fit. Turn it off to let your bar scroll out of view like everyone else's.
+- **Show Realm Names:** shows players from other realms as "Name-Realm". When it's off, just their name is shown.
+- **Text Outline:** turn off to remove the dark outline around the names and numbers on the bars.
+- **Text Color:** pick the color of the names and numbers on the bars.
 
-Because addon code can't write Edit Mode settings without tainting the Blizzard meter, the two don't stay in sync.
+Your options are shared by all of your characters.
 
-## Saved variables
+### A note about Edit Mode
 
-Options are saved for the whole account in `BlizzMeterSettings`.
+The first time you use BlizzMeter, it copies the look you had set for the damage meter in Edit Mode, so nothing changes. After that, change the meter's look in BlizzMeter's options instead. Changing the damage meter's look in Edit Mode won't affect BlizzMeter. Edit Mode still controls where the main window sits and how big it is.
 
-Window setup (tracked type, segment, lock, interactivity, minimized, extra windows) is saved per character in `BlizzMeterPerCharacterSettings`. On first load it's copied from the Blizzard meter's saved windows.
+If you'd like to bring your Edit Mode look over again, use **Copy Edit Mode Settings** at the bottom of the options.
 
-Extra windows also save their position and size there. Blizzard keeps these in the client's layout cache, which goes by frame name instead. An extra window with no saved position starts where the matching Blizzard window was, if you had moved that one.
+## During combat
 
-## Changes from the Blizzard meter
+The game limits what addons can see while you're in combat, so a few things work a little differently until combat ends:
 
-- Player names are shown without their realm ("Name-Realm" becomes "Name"), in the meter and in the spell breakdown, unless Show Realm Names is on. NPC names are left alone.
-- Class and spec icons are round and framed by a ring by default (see Spec Icon Shape).
+- Numbers are shown without percentages.
+- Deaths don't show the time they happened.
+- Enemy faction icons don't appear next to names.
+- Clicking a bar to see the spell breakdown only works on your own bar.
 
-## Differences in combat
-
-During combat, the game gives addons most damage meter data as *secret values*. Addon code can display them but can't compare them or do math on them. The Blizzard meter isn't affected because its code isn't addon code. While combat restrictions are active, BlizzMeter shows:
-
-- **Complete numbers** without the percentage, the same as Compact.
-- **Deaths** without the time of death.
-- **No enemy faction icons** next to names (shown with class colors on).
-- **Clicking a bar** opens the spell breakdown only for your own bar. Clicks on other bars do nothing until combat ends.
-- **Spell breakdown:** class colors on bars that would use the creature color.
-
-The meter redraws with the full display as soon as combat ends.
-
-## Updating to a new Blizzard build
-
-Get the new `Interface/AddOns/Blizzard_DamageMeter` from [Gethe/wow-ui-source](https://github.com/Gethe/wow-ui-source) (or export it in game with `/console exportInterfaceFiles code`). Apply the same renames (`DamageMeter` to `BlizzMeter`, `DAMAGE_METER_DEFAULT_BAR_HEIGHT` to `BLIZZMETER_DEFAULT_BAR_HEIGHT` and so on) and diff it against these files. Bring over the Blizzard changes and keep the `BlizzMeter:` adaptations.
+Everything goes back to normal as soon as you leave combat.
