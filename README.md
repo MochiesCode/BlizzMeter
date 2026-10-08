@@ -34,10 +34,16 @@ The Blizzard meter keeps running underneath so it can still be moved and resized
 
 Open them from Options > AddOns > BlizzMeter, with `/bm`, or from "BlizzMeter Options" in a meter window's settings menu.
 
-- **Appearance:** every Damage Meter style setting from Edit Mode, with the same ranges and choices.
-- **Class Icon Shape:** Square (Blizzard's), Circle, or Circle with Ring (masked inside the `services-cover-ring` atlas). Applies to class and spec icons; spell icons stay square.
+**Appearance** has every Damage Meter style setting from Edit Mode, with the same ranges and choices, plus:
+
+- **Spec Icon Shape:** Square (Blizzard's), Circle, or Circle with Ring (masked inside the `services-cover-ring` atlas). Applies to class and spec icons; spell icons stay square.
+- **Bar Color:** shown while Show Class Color is off. Every bar uses this color instead of Blizzard's default, ally and enemy colors.
+- **Always Show Your Bar:** when your bar is scrolled out of view, it's pinned to the top or bottom edge of the window (Blizzard's behavior). Turn off to let it scroll away like the others.
 - **Show Realm Names:** shows players from other realms as "Name-Realm" instead of "Name".
-- **Copy Edit Mode Settings:** replaces the Appearance options with the values from your current Edit Mode layout.
+- **Text Outline:** turn off to remove the black outline and shadow from the names and numbers on the bars.
+- **Text Color:** color of the names and numbers on the bars. Class-colored names in the spell breakdown keep their class color.
+
+**Copy Edit Mode Settings** replaces the options that Edit Mode also has with the values from your current Edit Mode layout.
 
 Because addon code can't write Edit Mode settings without tainting the Blizzard meter, the two don't stay in sync.
 
@@ -52,7 +58,7 @@ Extra windows also save their position and size there. Blizzard keeps these in t
 ## Changes from the Blizzard meter
 
 - Player names are shown without their realm ("Name-Realm" becomes "Name"), in the meter and in the spell breakdown, unless Show Realm Names is on. NPC names are left alone.
-- Class and spec icons are round and framed by a ring by default (see Class Icon Shape).
+- Class and spec icons are round and framed by a ring by default (see Spec Icon Shape).
 
 ## Differences in combat
 
@@ -60,7 +66,7 @@ During combat, the game gives addons most damage meter data as *secret values*. 
 
 - **Complete numbers** without the percentage, the same as Compact.
 - **Deaths** without the time of death.
-- **Class colors off:** default bar colors instead of ally and enemy colors, and no enemy faction icons.
+- **No enemy faction icons** next to names (shown with class colors on).
 - **Clicking a bar** opens the spell breakdown only for your own bar. Clicks on other bars do nothing until combat ends.
 - **Spell breakdown:** class colors on bars that would use the creature color.
 

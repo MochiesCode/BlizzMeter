@@ -416,16 +416,9 @@ function BlizzMeterEntryMixin:GetDesiredBarColor()
 			return RAID_CLASS_COLORS[classFilename] or self:GetDefaultStatusBarColor();
 		end
 	else
-		-- BlizzMeter: the source display type is secret in combat; the bar keeps the default color until then.
-		if IsSecret(self.sourceDisplayType) then
-			return self:GetDefaultStatusBarColor();
-		end
-
-		if self.sourceDisplayType == Enum.DamageMeterSourceDisplayType.Ally then
-			return self:GetAllyStatusBarColor();
-		elseif self.sourceDisplayType == Enum.DamageMeterSourceDisplayType.Enemy then
-			return self:GetEnemyStatusBarColor();
-		end
+		-- BlizzMeter: with class colors off, every bar uses the Bar Color option instead of Blizzard's default,
+		-- ally and enemy colors.
+		return BlizzMeterPrivate.Options.GetColor("barColor");
 	end
 
 	return self:GetDefaultStatusBarColor();
@@ -527,6 +520,49 @@ function BlizzMeterEntryMixin:UpdateBackground()
 	end
 end
 
+-- BlizzMeter: turns the font's outline and drop shadow on or off for the name and value text. The font's own
+-- flags and shadow offset are remembered the first time so they can be restored.
+function BlizzMeterEntryMixin:UpdateTextOutline()
+	local textOutline = BlizzMeterPrivate.Options.Get("textOutline");
+	if textOutline == self.textOutline then
+		return;
+	end
+
+	self.textOutline = textOutline;
+
+	for _, fontString in ipairs({ self:GetName(), self:GetValue() }) do
+		if not fontString.originalFontFlags then
+			local _fontFile, _fontHeight, fontFlags = fontString:GetFont();
+			fontString.originalFontFlags = fontFlags or "";
+			fontString.originalShadowX, fontString.originalShadowY = fontString:GetShadowOffset();
+		end
+
+		local fontFile, fontHeight = fontString:GetFont();
+		if textOutline then
+			fontString:SetFont(fontFile, fontHeight, fontString.originalFontFlags);
+			fontString:SetShadowOffset(fontString.originalShadowX, fontString.originalShadowY);
+		else
+			fontString:SetFont(fontFile, fontHeight, "");
+			fontString:SetShadowOffset(0, 0);
+		end
+	end
+end
+
+-- BlizzMeter: colors the name and value text. Color codes inside the text (eg. class-colored unit names in the
+-- spell breakdown) still take precedence.
+function BlizzMeterEntryMixin:UpdateTextColor()
+	local textColor = BlizzMeterPrivate.Options.Get("textColor");
+	if textColor == self.textColor then
+		return;
+	end
+
+	self.textColor = textColor;
+
+	local r, g, b = CreateColorFromHexString(textColor):GetRGB();
+	self:GetName():SetTextColor(r, g, b);
+	self:GetValue():SetTextColor(r, g, b);
+end
+
 function BlizzMeterEntryMixin:Init(source)
 	self.value = source.totalAmount;
 	self.valuePerSecond = source.amountPerSecond;
@@ -535,6 +571,8 @@ function BlizzMeterEntryMixin:Init(source)
 	self.index = source.index;
 	self.showsValuePerSecondAsPrimary = source.showsValuePerSecondAsPrimary;
 
+	self:UpdateTextOutline();
+	self:UpdateTextColor();
 	self:UpdateIcon();
 	self:UpdateName();
 	self:UpdateValue();

@@ -609,6 +609,11 @@ function BlizzMeterSessionWindowMixin:ShowsValuePerSecondAsPrimary()
 end
 
 function BlizzMeterSessionWindowMixin:AlwaysShowsLocalPlayer()
+	-- BlizzMeter: pinning the local player's bar to the window's edge can be turned off in the options.
+	if not BlizzMeterPrivate.Options.Get("pinLocalPlayer") then
+		return false;
+	end
+
 	local damageMeterType = self:GetDamageMeterType();
 	return DAMAGE_METER_TYPE_ALWAYS_SHOWS_LOCAL_PLAYER[damageMeterType];
 end

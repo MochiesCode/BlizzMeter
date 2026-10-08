@@ -79,6 +79,25 @@ local OptionInfo = {
 		default = false,
 		apply = ApplyRefreshEntries,
 	},
+	textOutline = {
+		default = true,
+		apply = ApplyRefreshEntries,
+	},
+	pinLocalPlayer = {
+		default = true,
+		apply = ApplyRefreshEntries,
+	},
+	textColor = {
+		default = "ffffffff",
+		apply = ApplyRefreshEntries,
+	},
+	-- Used for every bar while Show Class Color is off. Starts as Blizzard's default bar color.
+	barColor = {
+		default = function()
+			return DAMAGE_METER_STATUS_BAR_DEFAULT_COLOR and DAMAGE_METER_STATUS_BAR_DEFAULT_COLOR:GenerateHexColor() or "ffffffff";
+		end,
+		apply = ApplyRefreshEntries,
+	},
 };
 
 -- Settings panel setting objects, by option key. Changing a value through these keeps the panel's controls in sync.
@@ -94,13 +113,37 @@ local function GetSavedOptions()
 	return BlizzMeterSettings;
 end
 
+-- A default can be a function, for values that aren't available yet when this file loads.
+local function GetDefault(key)
+	local default = OptionInfo[key].default;
+	if type(default) == "function" then
+		return default();
+	end
+
+	return default;
+end
+
 function Options.Get(key)
 	local value = GetSavedOptions()[key];
 	if value == nil then
-		return OptionInfo[key].default;
+		return GetDefault(key);
 	end
 
 	return value;
+end
+
+local colorCache = {};
+
+-- Returns a color option as a Color object. The same object is returned until the value changes.
+function Options.GetColor(key)
+	local hexColor = Options.Get(key);
+	local cached = colorCache[key];
+	if not cached or cached.hexColor ~= hexColor then
+		cached = { hexColor = hexColor, color = CreateColorFromHexString(hexColor) };
+		colorCache[key] = cached;
+	end
+
+	return cached.color;
 end
 
 function Options.Set(key, value)
@@ -185,7 +228,7 @@ end
 
 local function RegisterSetting(key, variableType, name)
 	local variable = addonName .. "_" .. key;
-	local setting = Settings.RegisterProxySetting(category, variable, variableType, name, OptionInfo[key].default,
+	local setting = Settings.RegisterProxySetting(category, variable, variableType, name, GetDefault(key),
 		function() return Options.Get(key); end,
 		function(value) Options.Set(key, value); end);
 	settingObjects[key] = setting;
@@ -217,7 +260,13 @@ end
 
 local function AddCheckbox(key, name, tooltip)
 	local setting = RegisterSetting(key, Settings.VarType.Boolean, name);
-	Settings.CreateCheckbox(category, setting, tooltip);
+	return Settings.CreateCheckbox(category, setting, tooltip);
+end
+
+-- The value is an "AARRGGBB" hex string, which is what the settings panel's color swatch reads and writes.
+local function AddColorSwatch(key, name, tooltip)
+	local setting = RegisterSetting(key, Settings.VarType.String, name);
+	return Settings.CreateColorSwatch(category, setting, tooltip);
 end
 
 -- Ranges and choices match the Damage Meter's entries in Blizzard_EditMode's EditModeSettingDisplayInfo.
@@ -252,23 +301,34 @@ local function RegisterOptionsPanel()
 		{ value = Enum.DamageMeterVisibility.InGroup, text = HUD_EDIT_MODE_SETTING_DAMAGE_METER_VISIBILITY_IN_GROUP },
 	});
 
-	AddCheckbox("showSpecIcon", HUD_EDIT_MODE_SETTING_DAMAGE_METER_SHOW_SPEC_ICON);
-	AddCheckbox("showClassColor", HUD_EDIT_MODE_SETTING_DAMAGE_METER_SHOW_CLASS_COLOR);
-
-	layout:AddInitializer(CreateSettingsListSectionHeaderInitializer("Icons and Names"));
-
-	AddDropdown("iconShape", "Class Icon Shape", {
+	AddDropdown("iconShape", "Spec Icon Shape", {
 		{ value = BLIZZMETER_ICON_SHAPE_SQUARE, text = "Square" },
 		{ value = BLIZZMETER_ICON_SHAPE_CIRCLE, text = "Circle" },
 		{ value = BLIZZMETER_ICON_SHAPE_RING, text = "Circle with Ring" },
 	}, "Shape of the class and spec icons on the bars. Spell icons are always square.");
 
+	AddCheckbox("showSpecIcon", HUD_EDIT_MODE_SETTING_DAMAGE_METER_SHOW_SPEC_ICON);
+	local showClassColorInitializer = AddCheckbox("showClassColor", HUD_EDIT_MODE_SETTING_DAMAGE_METER_SHOW_CLASS_COLOR);
+
+	-- Only shown while Show Class Color is off. Changing any setting makes the panel re-check this.
+	local barColorInitializer = AddColorSwatch("barColor", "Bar Color", "Color of every bar while class colors are off.");
+	barColorInitializer:SetParentInitializer(showClassColorInitializer);
+	barColorInitializer:AddShownPredicate(function() return not Options.Get("showClassColor"); end);
+
+	AddCheckbox("pinLocalPlayer", "Always Show Your Bar",
+		"When your bar is scrolled out of view, pin it to the top or bottom edge of the window.");
+
 	AddCheckbox("showRealmNames", "Show Realm Names",
 		"Show players from other realms as \"Name-Realm\" instead of just \"Name\".");
 
+	AddCheckbox("textOutline", "Text Outline",
+		"Draw the black outline and shadow around the names and numbers on the bars.");
+
+	AddColorSwatch("textColor", "Text Color", "Color of the names and numbers on the bars.");
+
 	layout:AddInitializer(CreateSettingsListSectionHeaderInitializer("Edit Mode"));
 
-	local copyFromEditModeTooltip = "Replace the style options above with the Damage Meter's settings from your current Edit Mode layout. Position and size always come from Edit Mode.";
+	local copyFromEditModeTooltip = "Replace the options that Edit Mode also has with the Damage Meter's settings from your current Edit Mode layout. Position and size always come from Edit Mode.";
 	layout:AddInitializer(CreateSettingsButtonInitializer("Copy Edit Mode Settings", "Copy", Options.CopyFromEditMode, copyFromEditModeTooltip, true));
 
 	Settings.RegisterAddOnCategory(category);
