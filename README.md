@@ -1,6 +1,7 @@
-# BlizzMeter
 
+# BlizzMeter
 BlizzMeter is World of Warcraft's built-in damage meter with extra ways to customize how it looks. It works and feels just like the Blizzard meter: same windows, same menus, same data. It just gives you more control over its appearance.
+<img width="1195" height="822" alt="BlizzMeter" src="https://github.com/user-attachments/assets/26af4ebb-a6fb-4fc5-bbbb-8a3b4ae2a515" />
 
 ## Getting started
 
