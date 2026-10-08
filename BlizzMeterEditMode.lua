@@ -1,9 +1,12 @@
+local _, BlizzMeterPrivate = ...;
+
 -- BlizzMeter's stand-in for EditModeDamageMeterSystemMixin.
 --
 -- Addons can't register their own Edit Mode systems, so instead of being one, BlizzMeter follows the
 -- Blizzard Damage Meter's. It anchors itself to the Blizzard meter's Edit Mode frame, which gives it that
 -- frame's position and size (live, including while it's being dragged or resized in Edit Mode), copies the
--- frame's scale, and mirrors the system's settings and editing state.
+-- frame's scale, and mirrors the system's editing state. The system's style settings only give BlizzMeter's
+-- own options (BlizzMeterOptions.lua) their starting values.
 --
 -- The Blizzard meter keeps running underneath so its Edit Mode selection can still be moved, resized and
 -- configured as usual, but its windows are moved into a hidden parent so only BlizzMeter is visible.
@@ -115,101 +118,16 @@ function BlizzMeterEditModeSystemMixin:GetSettingValueBool(setting)
 	return self:GetEditModeSystem():GetSettingValueBool(setting);
 end
 
-function BlizzMeterEditModeSystemMixin:UpdateSystemSettingVisibility()
-	self.visibility = self:GetSettingValue(Enum.EditModeDamageMeterSetting.Visibility);
-	self:UpdateShownState();
-end
-
-function BlizzMeterEditModeSystemMixin:UpdateSystemSettingStyle()
-	local style = self:GetSettingValue(Enum.EditModeDamageMeterSetting.Style);
-	self:SetStyle(style);
-end
-
-function BlizzMeterEditModeSystemMixin:UpdateSystemSettingNumberDisplayType()
-	local numberDisplayType = self:GetSettingValue(Enum.EditModeDamageMeterSetting.Numbers);
-	self:SetNumberDisplayType(numberDisplayType);
-end
-
-function BlizzMeterEditModeSystemMixin:UpdateSystemSettingFrameWidth()
-	-- Applied to the Blizzard meter's frame, which this one is anchored to.
-end
-
-function BlizzMeterEditModeSystemMixin:UpdateSystemSettingFrameHeight()
-	-- Applied to the Blizzard meter's frame, which this one is anchored to.
-end
-
-function BlizzMeterEditModeSystemMixin:UpdateSystemSettingBarHeight()
-	local barHeight = self:GetSettingValue(Enum.EditModeDamageMeterSetting.BarHeight);
-	self:SetBarHeight(barHeight);
-end
-
-function BlizzMeterEditModeSystemMixin:UpdateSystemSettingPadding()
-	local barSpacing = self:GetSettingValue(Enum.EditModeDamageMeterSetting.Padding);
-	self:SetBarSpacing(barSpacing);
-end
-
-function BlizzMeterEditModeSystemMixin:UpdateSystemSettingTransparency()
-	local transparency = self:GetSettingValue(Enum.EditModeDamageMeterSetting.Transparency);
-	self:SetWindowTransparency(transparency);
-end
-
-function BlizzMeterEditModeSystemMixin:UpdateSystemSettingShowSpecIcon()
-	local showBarIcons = self:GetSettingValueBool(Enum.EditModeDamageMeterSetting.ShowSpecIcon);
-	self:SetShowBarIcons(showBarIcons);
-end
-
-function BlizzMeterEditModeSystemMixin:UpdateSystemSettingShowClassColor()
-	local useClassColor = self:GetSettingValueBool(Enum.EditModeDamageMeterSetting.ShowClassColor);
-	self:SetUseClassColor(useClassColor);
-end
-
-function BlizzMeterEditModeSystemMixin:UpdateSystemSettingTextSize()
-	local textSize = self:GetSettingValue(Enum.EditModeDamageMeterSetting.TextSize);
-	self:SetTextSize(textSize);
-end
-
-function BlizzMeterEditModeSystemMixin:UpdateSystemSettingBackgroundTransparency()
-	local backgroundTransparency = self:GetSettingValue(Enum.EditModeDamageMeterSetting.BackgroundTransparency);
-	self:SetBackgroundTransparency(backgroundTransparency);
-end
-
--- Runs after the Blizzard system has applied a setting. Unlike Blizzard's version this doesn't check the
--- system's dirty flags (they're cleared by then); the setters ignore values that haven't changed instead.
-function BlizzMeterEditModeSystemMixin:UpdateSystemSetting(setting, entireSystemUpdate)
+-- Runs after the Blizzard system has applied a setting. Style settings only seed BlizzMeter's options the first
+-- time they're seen (see BlizzMeterOptions.lua). Frame width and height need nothing here: they're applied to the
+-- Blizzard meter's frame, which this one is anchored to.
+function BlizzMeterEditModeSystemMixin:UpdateSystemSetting(setting, _entireSystemUpdate)
 	local editModeSystem = self:GetEditModeSystem();
 	if not editModeSystem:IsInitialized() or not editModeSystem:HasSetting(setting) then
 		return;
 	end
 
-	if setting == Enum.EditModeDamageMeterSetting.Visibility then
-		self:UpdateSystemSettingVisibility();
-	elseif setting == Enum.EditModeDamageMeterSetting.Style then
-		self:UpdateSystemSettingStyle();
-	elseif setting == Enum.EditModeDamageMeterSetting.Numbers then
-		self:UpdateSystemSettingNumberDisplayType();
-	elseif setting == Enum.EditModeDamageMeterSetting.FrameWidth then
-		self:UpdateSystemSettingFrameWidth();
-	elseif setting == Enum.EditModeDamageMeterSetting.FrameHeight then
-		self:UpdateSystemSettingFrameHeight();
-	elseif setting == Enum.EditModeDamageMeterSetting.BarHeight then
-		self:UpdateSystemSettingBarHeight();
-	elseif setting == Enum.EditModeDamageMeterSetting.Padding then
-		self:UpdateSystemSettingPadding();
-	elseif setting == Enum.EditModeDamageMeterSetting.Transparency then
-		self:UpdateSystemSettingTransparency();
-	elseif setting == Enum.EditModeDamageMeterSetting.ShowSpecIcon then
-		self:UpdateSystemSettingShowSpecIcon();
-	elseif setting == Enum.EditModeDamageMeterSetting.ShowClassColor then
-		self:UpdateSystemSettingShowClassColor();
-	elseif setting == Enum.EditModeDamageMeterSetting.TextSize then
-		self:UpdateSystemSettingTextSize();
-	elseif setting == Enum.EditModeDamageMeterSetting.BackgroundTransparency then
-		self:UpdateSystemSettingBackgroundTransparency();
-	end
-
-	if not entireSystemUpdate then
-		self:RefreshLayout();
-	end
+	BlizzMeterPrivate.Options.AdoptEditModeSetting(self, setting);
 end
 
 function BlizzMeterEditModeSystemMixin:OnUpdateSystem(anySettingsDirty)

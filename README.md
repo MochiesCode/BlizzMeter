@@ -15,6 +15,7 @@ Each file is a port of the matching Blizzard file, with `DamageMeter` renamed to
 | `BlizzMeterSettingsDropdownButton.lua/.xml` | `DamageMeterSettingsDropdownButton.lua/.xml` |
 | `BlizzMeterConstants.lua` | `DamageMeterConstants.lua` |
 | `BlizzMeterEditMode.lua/.xml` | `EditModeDamageMeterSystemMixin` / template in `Blizzard_EditMode` |
+| `BlizzMeterOptions.lua` | (new) the options panel |
 | `BlizzMeterSecrets.lua` | (new) helpers for secret values |
 
 Every place where the code differs from Blizzard's is marked with a `BlizzMeter:` comment.
@@ -24,12 +25,25 @@ Every place where the code differs from Blizzard's is marked with a `BlizzMeter:
 Addons can't register their own Edit Mode systems, so BlizzMeter follows the Blizzard Damage Meter's (`BlizzMeterEditMode.lua`):
 
 - The meter is anchored to the Blizzard meter's Edit Mode frame, so it takes that frame's position and size, live while it's dragged or resized, and copies its scale.
-- Every Damage Meter setting in Edit Mode (style, numbers, bar height, padding, opacity, background, text size, visibility, spec icons, class colors) is mirrored.
+- The Damage Meter's other Edit Mode settings (style, numbers, bar height, padding, opacity, background, text size, visibility, spec icons, class colors) only give BlizzMeter's options their starting values. After that, change them in BlizzMeter's options; changing them in Edit Mode has no effect on BlizzMeter.
 - Turning on the Damage Meter in Edit Mode shows BlizzMeter's preview, the same as Blizzard's.
 
-The Blizzard meter keeps running underneath so it can still be moved and configured in Edit Mode, but its windows are moved into a hidden frame so only BlizzMeter shows. Disabling BlizzMeter brings the Blizzard meter back unchanged.
+The Blizzard meter keeps running underneath so it can still be moved and resized in Edit Mode, but its windows are moved into a hidden frame so only BlizzMeter shows. Disabling BlizzMeter brings the Blizzard meter back unchanged.
+
+## Options
+
+Open them from Options > AddOns > BlizzMeter, with `/bm`, or from "BlizzMeter Options" in a meter window's settings menu.
+
+- **Appearance:** every Damage Meter style setting from Edit Mode, with the same ranges and choices.
+- **Class Icon Shape:** Square (Blizzard's), Circle, or Circle with Ring (masked inside the `services-cover-ring` atlas). Applies to class and spec icons; spell icons stay square.
+- **Show Realm Names:** shows players from other realms as "Name-Realm" instead of "Name".
+- **Copy Edit Mode Settings:** replaces the Appearance options with the values from your current Edit Mode layout.
+
+Because addon code can't write Edit Mode settings without tainting the Blizzard meter, the two don't stay in sync.
 
 ## Saved variables
+
+Options are saved for the whole account in `BlizzMeterSettings`.
 
 Window setup (tracked type, segment, lock, interactivity, minimized, extra windows) is saved per character in `BlizzMeterPerCharacterSettings`. On first load it's copied from the Blizzard meter's saved windows.
 
@@ -37,7 +51,8 @@ Extra windows also save their position and size there. Blizzard keeps these in t
 
 ## Changes from the Blizzard meter
 
-- Player names are shown without their realm ("Name-Realm" becomes "Name"), in the meter and in the spell breakdown. NPC names are left alone.
+- Player names are shown without their realm ("Name-Realm" becomes "Name"), in the meter and in the spell breakdown, unless Show Realm Names is on. NPC names are left alone.
+- Class and spec icons are round and framed by a ring by default (see Class Icon Shape).
 
 ## Differences in combat
 

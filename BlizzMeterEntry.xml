@@ -13,6 +13,12 @@ https://raw.githubusercontent.com/Gethe/wow-ui-source/live/Interface/AddOns/Bliz
 						<Texture parentKey="Icon" setAllPoints="true">
 							<TexCoords top="0.0626" left="0.0625" bottom="0.9" right="0.9"/>
 						</Texture>
+						<!-- BlizzMeter: circular mask for class/spec icons. Applied, and inset for the ring, in SetIconShape. -->
+						<MaskTexture parentKey="Mask" file="Interface\CharacterFrame\TempPortraitAlphaMask" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE" setAllPoints="true"/>
+					</Layer>
+					<Layer level="OVERLAY">
+						<!-- BlizzMeter: ring framing the masked class/spec icon, shown in SetIconShape. -->
+						<Texture parentKey="Ring" atlas="services-cover-ring" setAllPoints="true" hidden="true"/>
 					</Layer>
 				</Layers>
 			</Frame>

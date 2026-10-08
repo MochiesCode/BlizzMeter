@@ -480,6 +480,11 @@ function BlizzMeterSessionWindowMixin:InitializeSettingsDropdown()
 			Settings.OpenToCategory(Settings.ADVANCED_OPTIONS_CATEGORY_ID);
 		end);
 
+		-- BlizzMeter: style options live in BlizzMeter's own options panel (see BlizzMeterOptions.lua).
+		rootDescription:CreateButton("BlizzMeter Options", function(...)
+			BlizzMeterPrivate.Options.Open();
+		end);
+
 		rootDescription:CreateButton(DAMAGE_METER_OPEN_EDIT_MODE, function(...)
 			-- BlizzMeter: only close the settings panel if it's open. Closing it commits pending settings, which
 			-- shouldn't run from addon code when there's nothing to close.

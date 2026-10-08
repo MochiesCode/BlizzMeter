@@ -1,3 +1,5 @@
+local _, BlizzMeterPrivate = ...;
+
 local DAMAGE_METER_ENABLED_CVAR = "damageMeterEnabled";
 -- BlizzMeter: Blizzard_DamageMeter already makes this CVar cachable. Doing it again from addon code would
 -- write into CVarCallbackRegistry's shared table and taint the Blizzard meter's reads of it.
@@ -102,6 +104,10 @@ function BlizzMeterMixin:OnLoad()
 	self.windowDataList = {};
 	self.sessionType = Enum.DamageMeterSessionType.Overall;
 	self.sessionID = nil;
+
+	-- BlizzMeter: style settings come from BlizzMeter's options rather than Edit Mode (see BlizzMeterOptions.lua).
+	-- Applied before the windows are created so they start out with them.
+	BlizzMeterPrivate.Options.ApplyAll(self);
 
 	self:InitializeWindowDataList();
 end
@@ -280,6 +286,14 @@ function BlizzMeterMixin:ShouldBeShown()
 	return true;
 end
 
+-- BlizzMeter: set from BlizzMeter's options; Blizzard's Edit Mode system assigned self.visibility directly.
+function BlizzMeterMixin:SetVisibility(visibility)
+	if self.visibility ~= visibility then
+		self.visibility = visibility;
+		self:UpdateShownState();
+	end
+end
+
 function BlizzMeterMixin:UpdateShownState()
 	local shouldBeShown = self:ShouldBeShown();
 	self:SetShown(shouldBeShown);
@@ -292,6 +306,19 @@ end
 
 function BlizzMeterMixin:RefreshLayout()
 	self:ForEachSessionWindow(function(sessionWindow) sessionWindow:RefreshLayout(); end);
+end
+
+-- BlizzMeter: redraws every bar, including the spell breakdowns, for options that change how entries draw
+-- themselves (icon shape, realm names) rather than a window setting.
+function BlizzMeterMixin:RefreshEntries()
+	self:ForEachSessionWindow(function(sessionWindow)
+		sessionWindow:RefreshLayout();
+
+		local sourceWindow = sessionWindow:GetSourceWindow();
+		if sourceWindow:IsShown() then
+			sourceWindow:Refresh(ScrollBoxConstants.RetainScrollPosition);
+		end
+	end);
 end
 
 function BlizzMeterMixin:GetSessionWindow(index)

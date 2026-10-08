@@ -17,3 +17,11 @@ BLIZZMETER_TEXT_SIZE_TO_SCALE_MULTIPLIER = 0.01;
 
 -- Edit Mode also stores transparency in 0 to 100 units.
 BLIZZMETER_TRANSPARENCY_TO_ALPHA_MULTIPLIER = 0.01;
+
+-- BlizzMeter: shapes for class and spec icons on the bars (spell icons are always square).
+BLIZZMETER_ICON_SHAPE_SQUARE = 1;
+BLIZZMETER_ICON_SHAPE_CIRCLE = 2;
+BLIZZMETER_ICON_SHAPE_RING = 3; -- Circle framed by the services-cover-ring atlas.
+
+-- How far the circular mask is inset from the icon's edges so the icon sits inside the ring.
+BLIZZMETER_ICON_RING_INSET = 2;

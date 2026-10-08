@@ -1,14 +1,16 @@
 ## Interface: 120100
 ## Title: BlizzMeter
-## Notes: A standalone copy of the Blizzard Damage Meter that takes its position, size and settings from the Blizzard meter's Edit Mode layout.
+## Notes: A standalone copy of the Blizzard Damage Meter that follows the Blizzard meter's Edit Mode position and size, with its own style options.
 ## Author: MochiesCode
 ## Version: 1.0.0
 ## OptionalDeps: Blizzard_DamageMeter
+## SavedVariables: BlizzMeterSettings
 ## SavedVariablesPerCharacter: BlizzMeterPerCharacterSettings
 ## LoadSavedVariablesFirst: 1
 
 BlizzMeterConstants.lua
 BlizzMeterSecrets.lua
+BlizzMeterOptions.lua
 BlizzMeterEntry.lua
 BlizzMeterEntry.xml
 BlizzMeterSettingsDropdownButton.lua

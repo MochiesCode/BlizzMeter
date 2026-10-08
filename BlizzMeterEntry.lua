@@ -43,8 +43,44 @@ function BlizzMeterEntryMixin:GetIconTexture()
 	-- Override as necessary.
 end
 
+-- BlizzMeter: iconShape is one of the BLIZZMETER_ICON_SHAPE_* constants.
+function BlizzMeterEntryMixin:SetIconShape(iconShape)
+	if iconShape == self.iconShape then
+		return;
+	end
+
+	self.iconShape = iconShape;
+
+	local icon = self:GetIcon();
+	local mask = self.Icon.Mask;
+	local masked = iconShape ~= BLIZZMETER_ICON_SHAPE_SQUARE;
+	local showRing = iconShape == BLIZZMETER_ICON_SHAPE_RING;
+
+	if masked then
+		local inset = showRing and BLIZZMETER_ICON_RING_INSET or 0;
+		mask:ClearAllPoints();
+		mask:SetPoint("TOPLEFT", inset, -inset);
+		mask:SetPoint("BOTTOMRIGHT", -inset, inset);
+	end
+
+	if masked ~= (self.iconMasked == true) then
+		self.iconMasked = masked;
+		if masked then
+			icon:AddMaskTexture(mask);
+		else
+			icon:RemoveMaskTexture(mask);
+		end
+	end
+
+	self.Icon.Ring:SetShown(showRing);
+end
+
 function BlizzMeterEntryMixin:UpdateIcon()
+	-- BlizzMeter: class atlases and spec icons take the shape chosen in the options; spell icons stay square.
 	local atlasElement = self:GetIconAtlasElement();
+	local isClassIcon = atlasElement ~= nil or (self.specIconID ~= nil and self.specIconID ~= 0);
+	self:SetIconShape(isClassIcon and BlizzMeterPrivate.Options.Get("iconShape") or BLIZZMETER_ICON_SHAPE_SQUARE);
+
 	if atlasElement then
 		if atlasElement ~= self.iconAtlasElement then
 			self.iconAtlasElement = atlasElement;
@@ -258,7 +294,8 @@ function BlizzMeterEntryMixin:GetBackgroundEdgeVisibilityForStyle(style)
 end
 
 function BlizzMeterEntryMixin:SetupSharedStyleIconVisibility()
-	self:GetIcon():SetShown(self:ShouldShowBarIcons());
+	-- BlizzMeter: hides the icon's container rather than just the icon texture, so the ring goes with it.
+	self.Icon:SetShown(self:ShouldShowBarIcons());
 end
 
 function BlizzMeterEntryMixin:SetupSharedStyleBackground()
@@ -511,9 +548,14 @@ end
 
 BlizzMeterSourceEntryMixin = {}
 
--- BlizzMeter: removes the realm from player names ("Name-Realm" -> "Name"). Ambiguate accepts secret names,
--- so this also works in combat. Only used for players, since NPC names can contain hyphens (eg. "Ra-den").
+-- BlizzMeter: removes the realm from player names ("Name-Realm" -> "Name") unless the options say to show realms.
+-- Ambiguate accepts secret names, so this also works in combat. Only used for players, since NPC names can contain
+-- hyphens (eg. "Ra-den").
 local function StripRealm(name)
+	if BlizzMeterPrivate.Options.Get("showRealmNames") then
+		return name;
+	end
+
 	return Ambiguate(name, "short");
 end
 
