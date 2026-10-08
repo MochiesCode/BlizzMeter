@@ -273,12 +273,28 @@ local function AddColorSwatch(key, name, tooltip)
 	return Settings.CreateColorSwatch(category, setting, tooltip);
 end
 
+-- The category name is used for both the sidebar entry and the page header, so the version
+-- is swapped into the header text whenever the panel shows our page.
+local function AddVersionToHeader()
+	local version = C_AddOns.GetAddOnMetadata(addonName, "Version");
+	local settingsList = version and SettingsPanel and SettingsPanel:GetSettingsList();
+	local headerTitle = settingsList and settingsList.Header and settingsList.Header.Title;
+	if not headerTitle then
+		return;
+	end
+
+	local title = addonName .. " v" .. version;
+	hooksecurefunc(headerTitle, "SetText", function(self, text)
+		if text == addonName then
+			self:SetText(title);
+		end
+	end);
+end
+
 -- Ranges and choices match the Damage Meter's entries in Blizzard_EditMode's EditModeSettingDisplayInfo.
 local function RegisterOptionsPanel()
 	local layout;
-	local version = C_AddOns.GetAddOnMetadata(addonName, "Version");
-	local title = version and (addonName .. " v" .. version) or addonName;
-	category, layout = Settings.RegisterVerticalLayoutCategory(title);
+	category, layout = Settings.RegisterVerticalLayoutCategory(addonName);
 
 	AddDropdown("style", HUD_EDIT_MODE_SETTING_DAMAGE_METER_STYLE, {
 		{ value = Enum.DamageMeterStyle.Default, text = HUD_EDIT_MODE_SETTING_DAMAGE_METER_STYLE_DEFAULT },
@@ -337,6 +353,7 @@ local function RegisterOptionsPanel()
 	layout:AddInitializer(CreateSettingsButtonInitializer("Copy Edit Mode Settings", "Copy", Options.CopyFromEditMode, copyFromEditModeTooltip, true));
 
 	Settings.RegisterAddOnCategory(category);
+	AddVersionToHeader();
 end
 
 EventUtil.ContinueOnAddOnLoaded(addonName, RegisterOptionsPanel);
