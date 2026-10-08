@@ -131,6 +131,10 @@ function BlizzMeterMixin:OnEvent(event, ...)
 		-- secondary windows that new windows here take their positions from.
 		self:UnregisterEvent("PLAYER_ENTERING_WORLD");
 		self:RestoreSessionWindowPositions();
+
+		-- BlizzMeter: the meter can still be unavailable when VARIABLES_LOADED fires, which left it hidden until
+		-- the next combat or group change. Check again now that the player is in the world.
+		self:UpdateShownState();
 	end
 end
 

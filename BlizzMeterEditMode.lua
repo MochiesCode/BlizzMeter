@@ -73,6 +73,14 @@ function BlizzMeterEditModeSystemMixin:OnSystemLoad()
 		self:UpdateSystemScale();
 	end);
 
+	-- Whenever the Blizzard meter re-checks whether it should be shown (including when the damage meter becomes
+	-- available after login), check again here too.
+	if editModeSystem.UpdateShownState then
+		hooksecurefunc(editModeSystem, "UpdateShownState", function()
+			self:UpdateShownState();
+		end);
+	end
+
 	-- Edit Mode normally applies its layout after login, which the hooks above pick up. If it already has,
 	-- catch up once this frame has finished loading.
 	if editModeSystem:IsInitialized() then
