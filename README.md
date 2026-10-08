@@ -1,10 +1,11 @@
-# BlizzMeter
 
+# BlizzMeter
 BlizzMeter is World of Warcraft's built-in damage meter with extra ways to customize how it looks. It works and feels just like the Blizzard meter: same windows, same menus, same data. It just gives you more control over its appearance.
+<img width="1195" height="822" alt="BlizzMeter" src="https://github.com/user-attachments/assets/26af4ebb-a6fb-4fc5-bbbb-8a3b4ae2a515" />
 
 ## Getting started
 
-1. Put the `BlizzMeter` folder in `World of Warcraft/_retail_/Interface/AddOns`.
+1. Install via curseforge
 2. Make sure the game's own damage meter is turned on in the game's options. The gear menu on the meter has a shortcut to that setting.
 3. Log in. BlizzMeter takes the place of the Blizzard meter automatically.
 
